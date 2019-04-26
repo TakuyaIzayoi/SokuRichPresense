@@ -20,6 +20,7 @@
 
 #include "discord_register.h"
 #include "discord_rpc.h"
+#include "sokuRPFunctions.h"
 
 
 // Original function calls, needed to create a new game, render, process game loop and destroy game.
@@ -50,6 +51,7 @@ DiscordEventHandlers handlers;
 // OnDestruct is called when leaving the game, or upon re-entering the character select menu (which then calls OnCreate).
 
 // OnRender is called before OnProcess, and loops.
+
 void InitDiscord()
 {
     memset(&handlers, 0, sizeof(handlers));
@@ -68,6 +70,7 @@ void InitDiscord()
 }
 
 	//sends the update to the application/discord
+	
 static void NewPresence()
 {;
 
@@ -125,7 +128,7 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	void* p2 = ACCESS_PTR(battleManager, ADDR_BMGR_P2);
 	
 	char wau= ACCESS_CHAR(p1, CF_CHARACTER_INDEX) + 65;
-	
+	// char wau2 = (char)0x0047D857;
 	
 	// char wau2 = ACCESS_CHAR(p1, CF_PLAYER_INDEX);
 
@@ -145,7 +148,7 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 
 	//Press CTRL, effect visible in VS mode, as practice mode hardsets HP 
 	if (GetKeyState(VK_CONTROL) & 0x8000) {
-		std::cout << "P1: " << p1Health << "(" << (float) (p1Spirit) / 200 << ")" << wau 
+		std::cout << "P1: " << p1Health << "(" << (float) (p1Spirit) / 200 << ")" << wau2 
 			  << " [VS] P2: " << p2Health << "(" << (float) (p2Spirit) / 200 << ")" << std::endl;
 		// ACCESS_SHORT(p1, CF_CURRENT_HEALTH) = 5000;
 	}
