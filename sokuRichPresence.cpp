@@ -127,9 +127,13 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	void* p1 = ACCESS_PTR(battleManager, ADDR_BMGR_P1);	
 	void* p2 = ACCESS_PTR(battleManager, ADDR_BMGR_P2);
 	
+<<<<<<< HEAD
 	char wau= ACCESS_CHAR(p1, CF_CHARACTER_INDEX) + 65;
 	// char wau2 = (char)0x0047D857;
 	
+=======
+	std::string wau = ACCESS_CHAR(p1, CF_CHARACTER_INDEX);
+>>>>>>> parent of ccf81b2... holy fuck you found the chars
 	// char wau2 = ACCESS_CHAR(p1, CF_PLAYER_INDEX);
 
 	
