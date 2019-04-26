@@ -16,8 +16,8 @@
 #include "fields.h"
 #include "address.h"
 
-#include "include/discord_register.h"
-#include "include/discord_rpc.h"
+#include "discord_register.h"
+#include "discord_rpc.h"
 
 
 // Original function calls, needed to create a new game, render, process game loop and destroy game.
@@ -41,6 +41,11 @@ DiscordRichPresence discordPresence;
 #define ADDR_BMGR_P1 0x0C
 #define ADDR_BMGR_P2 0x10
 
+
+// OnCreate is called when entering character select menu.
+// OnDestruct is called when leaving the game, or upon re-entering the character select menu (which then calls OnCreate).
+
+// OnRender is called before OnProcess, and loops.
 void InitDiscord()
 {
     DiscordEventHandlers handlers;
@@ -56,22 +61,23 @@ void InitDiscord()
     Discord_Initialize("570515970381185024", &handlers, 1, "1234");
 }
 
+	//sends the update to the application/discord
 static void UpdatePresence()
 {
     DiscordRichPresence discordPresence;
     memset(&discordPresence, 0, sizeof(discordPresence));
     discordPresence.state = "Yosu (Marisa)";
-    discordPresence.details = "Thiena (Aya) vs";
+    discordPresence.details = "Thiena (Aya)";
     discordPresence.largeImageKey = "sokuicon";
     discordPresence.largeImageText = "placeholder";
-    discordPresence.partyId = "ae488379-351d-4a4f-ad32-2b9b01c91657";
-    discordPresence.spectateSecret = "MTIzNDV8MTIzNDV8MTMyNDU0";
-    discordPresence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM= ";
+    // discordPresence.partyId = "ae488379-351d-4a4f-ad32-2b9b01c91657";
+    // discordPresence.spectateSecret = "MTIzNDV8MTIzNDV8MTMyNDU0"; //can prob use for spectating games. WOW
+    // discordPresence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM= ";//can prob be used for hosting games.
     Discord_UpdatePresence(&discordPresence);
 }
 
 
-
+	//char select
 void* __fastcall CBattleManager_OnCreate(void *This) {
 	CBattleManager_Create(This);
 	std::cout << "OnCreate Called: "<< sizeof(void* (C::*)()) << std::endl;
@@ -80,12 +86,12 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 	return This;
 }
 
-
+	//loops 
 void __fastcall CBattleManager_OnRender(void *This) {
 	CBattleManager_Render(This);
 }
 
-
+	//fights stuff? in battle.
 int __fastcall CBattleManager_OnProcess(void *This) {
 	int ret;
 	ret = CBattleManager_Process(This);
@@ -201,5 +207,5 @@ Add the path to your module in SWRSToys.ini, without the ";".
 Compile manually with the following line:
 g++ Template.cpp -shared -o Template.dll
 
-g++ -std=c++11 *.cpp -shared -o test.dll -D_WIN32_WINNT=0x0501
+g++ -std=c++11 *.cpp -shared -D_WIN32_WINNT=0x0501 -o SokuRP.dll
 */
