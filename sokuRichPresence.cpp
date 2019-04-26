@@ -128,16 +128,7 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	
 
 	char wau= ACCESS_CHAR(p1, CF_CHARACTER_INDEX) + 65;
-	// char wau2 = (char)0x0047D857;
-	
 
-	std::string wau = ACCESS_CHAR(p1, CF_CHARACTER_INDEX);
-
-	// char wau2 = ACCESS_CHAR(p1, CF_PLAYER_INDEX);
-
-	
-	// std::cout << wau << std::endl;
-	// std::cout << "OnCreate Called: "<< sizeof(void* (C::*)()) << std::endl;
 
 
 /* HEALTH DISPLAY */
@@ -151,7 +142,7 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 
 	//Press CTRL, effect visible in VS mode, as practice mode hardsets HP 
 	if (GetKeyState(VK_CONTROL) & 0x8000) {
-		std::cout << "P1: " << p1Health << "(" << (float) (p1Spirit) / 200 << ")" << wau2 
+		std::cout << "P1: " << p1Health << "(" << (float) (p1Spirit) / 200 << ")" << wau 
 			  << " [VS] P2: " << p2Health << "(" << (float) (p2Spirit) / 200 << ")" << std::endl;
 		// ACCESS_SHORT(p1, CF_CURRENT_HEALTH) = 5000;
 	}
@@ -179,10 +170,10 @@ void* __fastcall CBattleManager_OnDestruct(void *This, int mystery, int dyn) {
 	ret = CBattleManager_Destruct(This, dyn);
 	std::cout << "OnDestruct Called" << std::endl;
 	
-	NewPresence();
-	discordPresence.details = "Character Select";
-	Discord_UpdatePresence(&discordPresence);
-	
+	// NewPresence();
+	// discordPresence.details = "Character Select";
+	// Discord_UpdatePresence(&discordPresence);
+	Discord_Shutdown();
 
 	return ret;
 }
