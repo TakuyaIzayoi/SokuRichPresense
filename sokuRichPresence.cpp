@@ -44,7 +44,8 @@ static unsigned long long s_origCBattleManager_OnProcess;
 DiscordRichPresence discordPresence;
 DiscordEventHandlers handlers;
 std::map<char,std::string> Characters;
-void SendDiscordRP();
+void SendDiscordNetplayRP();
+void SendDiscordLocalRP();
 char p1char;
 char p2char;
 char* p1name;
@@ -105,18 +106,43 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 	
 	InitDiscord();
 	NewPresence();
-	if (g_mainMode == SWRSMODE_VSSERVER)
+	
+	
+	if (g_mainMode == SWRSMODE_VSCLIENT)
 	{
-		discordPresence.details = "VS Network (Client)";
+		discordPresence.details = "VS Network (P1)";
 		p1name = g_pprofP1; //gets player name info in netplay.
 		p2name = g_pprofP2; //gets player name info in netplay.
 	}
+	else if (g_mainMode == SWRSMODE_VSSERVER)
+	{
+		discordPresence.details = "VS Network (P2)";
+		p1name = g_pprofP1; //gets player name info in netplay.
+		p2name = g_pprofP2; //gets player name info in netplay.
+	}
+	else if (g_mainMode == SWRSMODE_VSWATCH)
+	{
+		discordPresence.details = "Spectating";
+		p1name = g_pprofP1; //gets player name info in netplay.
+		p2name = g_pprofP2; //gets player name info in netplay.
+	}
+
+	else if (g_mainMode == SWRSMODE_PRACTICE)
+	{
+		discordPresence.details = "Practice Mode";
+		// p1name = g_profP1; //gets player name info in netplay.
+		// p2name = g_pprofP2; //gets player name info in netplay.
+	}
+	
 	else
 	{
 		discordPresence.details = "Some Other Gamemode";
+		// p1name = g_profP1; //gets player name info in non netplay.
 	}
 	// discordPresence.state = "Character Select";
 	Discord_UpdatePresence(&discordPresence);
+	
+	
 	return This;
 }
 
@@ -142,8 +168,8 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	void* p1 = ACCESS_PTR(battleManager, ADDR_BMGR_P1);	
 	void* p2 = ACCESS_PTR(battleManager, ADDR_BMGR_P2);
 	
-	char p1char= ACCESS_CHAR(p1, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
-	char p2char= ACCESS_CHAR(p2, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
+	p1char = ACCESS_CHAR(p1, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
+	p2char = ACCESS_CHAR(p2, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
 
 
 
@@ -163,11 +189,16 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 		// std::cout << "P1: " << p1Health << "(" << (float) (p1Spirit) / 200 << ")" << wau << nameWau
 			  // << " [VS] P2: " << p2Health << "(" << (float) (p2Spirit) / 200 << ")" << std::endl;
 		// ACCESS_SHORT(p1, CF_CURRENT_HEALTH) = 5000;
-		
-		std::cout << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;
-		
-		SendDiscordRP();
-		
+		if (g_mainMode == SWRSMODE_VSSERVER || g_mainMode == SWRSMODE_VSCLIENT || g_mainMode == SWRSMODE_VSWATCH) //Versus Network Online Play.
+		{
+			std::cout << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;
+			SendDiscordNetplayRP();
+		}
+		if (g_mainMode == SWRSMODE_PRACTICE)
+		{
+			std::cout << obtainChar(p1char) << std::endl;
+			SendDiscordLocalRP();
+		}
 	}
 
 
@@ -304,30 +335,55 @@ std::string obtainChar(char charKey)
 	return Characters[charKey];
 }
 
-void SendDiscordRP()
+void SendDiscordNetplayRP()
 {	
 		
-		std::cout << "Start making string" << std::endl;
+		// std::cout << "Start making string" << std::endl;
 		
 		std::string wau;
 		// wau << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;
 		wau.append(p1name);
 		wau.append(" ");
-		wau.append(obtainChar(p1char));
+		wau = wau + (obtainChar(p1char));
 		wau.append(" VS ");
 		wau.append(p2name);
 		wau.append(" ");
-		wau.append(obtainChar(p2char));
+		wau = wau + (obtainChar(p2char));
 		
 		
-		std::cout << "Appended" << std::endl;
+		// std::cout << "Appended" << std::endl;
 		
 		// char* cstr = char[128];
 		std::strcpy(cstr, wau.c_str());
 		discordPresence.state = cstr;
+		discordPresence.largeImageText = cstr;
 		Discord_UpdatePresence(&discordPresence);
 		memset(cstr,0,strlen(cstr));
 		
 		
-		std::cout << "Sent!" << std::endl;
+		// std::cout << "Sent!" << std::endl;
+}
+
+void SendDiscordLocalRP()
+{	
+		
+		// std::cout << "Start making string" << std::endl;
+		
+		std::string wau;
+		// wau << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;
+		wau = wau + (obtainChar(p1char));
+
+		
+		
+		// std::cout << "Appended" << std::endl;
+		
+		// char* cstr = char[128];
+		std::strcpy(cstr, wau.c_str());
+		discordPresence.state = cstr;
+		discordPresence.largeImageText = cstr;
+		Discord_UpdatePresence(&discordPresence);
+		memset(cstr,0,strlen(cstr));
+		
+		
+		// std::cout << "Sent!" << std::endl;
 }
