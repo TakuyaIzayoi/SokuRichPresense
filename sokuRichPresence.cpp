@@ -51,6 +51,8 @@ char p2char;
 char* p1name;
 char* p2name;
 char* cstr = new char[128];
+char* iconKey = new char[32];
+int mutex = 0; 
 
 #define ADDR_BMGR_P1 0x0C
 #define ADDR_BMGR_P2 0x10
@@ -62,7 +64,7 @@ char* cstr = new char[128];
 // OnRender is called before OnProcess, and loops.
 
 void makeMap();
-std::string obtainChar(char charKey);
+std::string obtainChar(char iconKey);
 
 void InitDiscord()
 {
@@ -90,7 +92,7 @@ static void NewPresence()
     // discordPresence.state = "Yosu (Marisa)";
     // discordPresence.details = "Thiena (Aya)";
     discordPresence.largeImageKey = "sokuicon";
-    discordPresence.largeImageText = "placeholder";
+    // discordPresence.largeImageText = "placeholder";
     // discordPresence.partyId = "ae488379-351d-4a4f-ad32-2b9b01c91657";
     // discordPresence.spectateSecret = "MTIzNDV8MTIzNDV8MTMyNDU0"; //can prob use for spectating games. WOW
     // discordPresence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM= ";//can prob be used for hosting games.
@@ -98,7 +100,6 @@ static void NewPresence()
 }
 
 
-	//char select
 void* __fastcall CBattleManager_OnCreate(void *This) {
 	CBattleManager_Create(This);
 	std::cout << "OnCreate Called: "<< sizeof(void* (C::*)()) << std::endl;
@@ -140,6 +141,10 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 		// p1name = g_profP1; //gets player name info in non netplay.
 	}
 	// discordPresence.state = "Character Select";
+	
+
+	
+	
 	Discord_UpdatePresence(&discordPresence);
 	
 	
@@ -151,6 +156,7 @@ void __fastcall CBattleManager_OnRender(void *This) {
 	CBattleManager_Render(This);
 	
 
+
 }
 
 	//fights stuff? in battle.
@@ -158,6 +164,17 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	int ret;
 	ret = CBattleManager_Process(This);
 	int battleManager = ACCESS_INT(ADDR_BATTLE_MANAGER, 0);
+	
+	if (g_sceneId == SWRSSCENE_SELECT)
+	{
+		discordPresence.state = "Character Select";
+	}
+	if (g_sceneId == SWRSSCENE_BATTLE)
+	{
+		discordPresence.state = "In Combat";
+	}
+	
+	Discord_UpdatePresence(&discordPresence);
 	
 	// discordPresence.state = "Yosu (Marisa)";
     // discordPresence.details = "Thiena (Aya)";	
@@ -330,9 +347,9 @@ void makeMap()
 	
 }
 
-std::string obtainChar(char charKey)
+std::string obtainChar(char iconKey)
 {
-	return Characters[charKey];
+	return Characters[iconKey];
 }
 
 void SendDiscordNetplayRP()
@@ -341,13 +358,15 @@ void SendDiscordNetplayRP()
 		// std::cout << "Start making string" << std::endl;
 		
 		std::string wau;
+		std::string charName;
 		// wau << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;
-		wau.append(p1name);
-		wau.append(" ");
-		wau = wau + (obtainChar(p1char));
+		// wau.append(p1name);
+		// wau.append(" ");
+		charName = (obtainChar(p1char));
+		wau = wau + charName;
 		wau.append(" VS ");
-		wau.append(p2name);
-		wau.append(" ");
+		// wau.append(p2name);
+		// wau.append(" ");
 		wau = wau + (obtainChar(p2char));
 		
 		
@@ -355,10 +374,16 @@ void SendDiscordNetplayRP()
 		
 		// char* cstr = char[128];
 		std::strcpy(cstr, wau.c_str());
+		std::strcpy(iconKey, wau.c_str());
+		iconKey[0] = iconKey[0]+32;
 		discordPresence.state = cstr;
+		
+		std::strcpy(cstr, charName.c_str());
 		discordPresence.largeImageText = cstr;
+		// cstr[0]=cstr[0]+32;
+		discordPresence.largeImageKey = iconKey;
 		Discord_UpdatePresence(&discordPresence);
-		memset(cstr,0,strlen(cstr));
+		// memset(cstr,0,strlen(cstr));
 		
 		
 		// std::cout << "Sent!" << std::endl;
@@ -370,19 +395,20 @@ void SendDiscordLocalRP()
 		// std::cout << "Start making string" << std::endl;
 		
 		std::string wau;
-		// wau << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;
-		wau = wau + (obtainChar(p1char));
+		// std::string charName;
+		// wau << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;		
+		
+		wau = (obtainChar(p1char));
+		// wau = wau + charName;
 
-		
-		
-		// std::cout << "Appended" << std::endl;
-		
-		// char* cstr = char[128];
 		std::strcpy(cstr, wau.c_str());
+		std::strcpy(iconKey, wau.c_str());
 		discordPresence.state = cstr;
 		discordPresence.largeImageText = cstr;
+		iconKey[0]=iconKey[0]+32;
+		discordPresence.largeImageKey = iconKey;
 		Discord_UpdatePresence(&discordPresence);
-		memset(cstr,0,strlen(cstr));
+		// memset(cstr,0,strlen(cstr));
 		
 		
 		// std::cout << "Sent!" << std::endl;
