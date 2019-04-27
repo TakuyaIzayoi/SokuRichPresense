@@ -39,10 +39,16 @@ static unsigned long long s_origCBattleManager_OnCreate;
 static unsigned long long s_origCBattleManager_OnDestruct;
 static unsigned long long s_origCBattleManager_OnRender;
 static unsigned long long s_origCBattleManager_OnProcess;
+
+//Literally other crap to initialize holy shit you'll need a header.
 DiscordRichPresence discordPresence;
 DiscordEventHandlers handlers;
 std::map<char,std::string> Characters;
-
+void SendDiscordRP();
+char p1char;
+char p2char;
+char* p1name;
+char* p2name;
 
 #define ADDR_BMGR_P1 0x0C
 #define ADDR_BMGR_P2 0x10
@@ -98,9 +104,9 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 	
 	InitDiscord();
 	NewPresence();
-	if (g_mainMode == SWRSMODE_VSWATCH)
+	if (g_mainMode == SWRSMODE_VSSERVER)
 	{
-		discordPresence.details = "Spectating";
+		discordPresence.details = "VS Network (Client)";
 	}
 	else
 	{
@@ -137,7 +143,7 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	char p2char= ACCESS_CHAR(p2, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
 
 	char* p1name = g_pprofP1; //gets player name info in netplay.
-	char* p2name = g_pprofP1; //gets player name info in netplay.
+	char* p2name = g_pprofP2; //gets player name info in netplay.
 
 
 
@@ -156,6 +162,8 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 			  // << " [VS] P2: " << p2Health << "(" << (float) (p2Spirit) / 200 << ")" << std::endl;
 		// ACCESS_SHORT(p1, CF_CURRENT_HEALTH) = 5000;
 		std::cout << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;
+		
+		SendDiscordRP();
 		
 	}
 
@@ -270,19 +278,20 @@ void makeMap()
 	Characters.insert(std::make_pair('D',"Alice"));
 	Characters.insert(std::make_pair('E',"Patchouli"));
 	Characters.insert(std::make_pair('F',"Youmu"));
-	Characters.insert(std::make_pair('G',"Yuyuko"));
-	Characters.insert(std::make_pair('H',"Yukari"));
-	Characters.insert(std::make_pair('I',"Suika"));
-	Characters.insert(std::make_pair('J',"Aya"));
-	Characters.insert(std::make_pair('K',"Reisen"));
-	Characters.insert(std::make_pair('L',"Komachi"));
-	Characters.insert(std::make_pair('M',"Iku"));
-	Characters.insert(std::make_pair('N',"Tenshi"));
-	Characters.insert(std::make_pair('O',"Sanae"));
-	Characters.insert(std::make_pair('P',"Meiling"));
+	Characters.insert(std::make_pair('G',"Remilia"));
+	Characters.insert(std::make_pair('H',"Yuyuko"));
+	Characters.insert(std::make_pair('I',"Yukari"));
+	Characters.insert(std::make_pair('J',"Suika"));
+	Characters.insert(std::make_pair('K',"Aya"));
+	Characters.insert(std::make_pair('L',"Reisen"));
+	Characters.insert(std::make_pair('M',"Komachi"));
+	Characters.insert(std::make_pair('N',"Iku"));
+	Characters.insert(std::make_pair('O',"Tenshi"));
+	Characters.insert(std::make_pair('P',"Sanae"));
 	Characters.insert(std::make_pair('Q',"Cirno"));
-	Characters.insert(std::make_pair('R',"Suwako"));
+	Characters.insert(std::make_pair('R',"Meiling"));
 	Characters.insert(std::make_pair('S',"Utsuho"));
+	Characters.insert(std::make_pair('T',"Suwako"));
 	
 	
 }
@@ -292,3 +301,15 @@ std::string obtainChar(char charKey)
 	return Characters[charKey];
 }
 
+void SendDiscordRP()
+{	
+	char* gameStatus= new char[128];
+	strcpy(gameStatus, p1name);
+	strcat(gameStatus, " ");
+	strcat(gameStatus, obtainChar(p1char).c_str());
+	strcat(gameStatus, " VS ");
+	strcat(gameStatus, p2name);
+	strcat(gameStatus, obtainChar(p2char).c_str());
+	discordPresence.state = gameStatus;
+	Discord_UpdatePresence(&discordPresence);
+}
