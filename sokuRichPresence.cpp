@@ -165,16 +165,8 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	ret = CBattleManager_Process(This);
 	int battleManager = ACCESS_INT(ADDR_BATTLE_MANAGER, 0);
 	
-	if (g_sceneId == SWRSSCENE_SELECT)
-	{
-		discordPresence.state = "Character Select";
-	}
-	if (g_sceneId == SWRSSCENE_BATTLE)
-	{
-		discordPresence.state = "In Combat";
-	}
+
 	
-	Discord_UpdatePresence(&discordPresence);
 	
 	// discordPresence.state = "Yosu (Marisa)";
     // discordPresence.details = "Thiena (Aya)";	
@@ -188,9 +180,28 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	p1char = ACCESS_CHAR(p1, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
 	p2char = ACCESS_CHAR(p2, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
 
+	// if (g_sceneId == SWRSSCENE_SELECT)
+	// {
+		// discordPresence.state = "Character Select";
+	// }
+	if (g_sceneId == SWRSSCENE_BATTLE && mutex == 0) //will be your mutex for combat.
+	{
+		// discordPresence.state = "In Combat";
+		discordPresence.startTimestamp = time(NULL);
+		mutex = 1;
+		SendDiscordLocalRP();
+	}
 
-
-
+	// if (g_sceneId != SWRSSCENE_BATTLE && mutex == 1) //will be your mutex for combat.
+	// {
+		// mutex = 0;
+		// // discordPresence.startTimestamp = (NULL);
+		
+		
+		// NewPresence();
+		// Discord_UpdatePresence(&discordPresence);
+		// // SendDiscordLocalRP();
+	// }
 
 /* HEALTH DISPLAY */
 	//ACCESS_<variable_type>() is both used for accessing and writing to the resource.
