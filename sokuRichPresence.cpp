@@ -49,6 +49,7 @@ char p1char;
 char p2char;
 char* p1name;
 char* p2name;
+char* cstr = new char[128];
 
 #define ADDR_BMGR_P1 0x0C
 #define ADDR_BMGR_P2 0x10
@@ -107,6 +108,8 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 	if (g_mainMode == SWRSMODE_VSSERVER)
 	{
 		discordPresence.details = "VS Network (Client)";
+		p1name = g_pprofP1; //gets player name info in netplay.
+		p2name = g_pprofP2; //gets player name info in netplay.
 	}
 	else
 	{
@@ -142,17 +145,16 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	char p1char= ACCESS_CHAR(p1, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
 	char p2char= ACCESS_CHAR(p2, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
 
-	char* p1name = g_pprofP1; //gets player name info in netplay.
-	char* p2name = g_pprofP2; //gets player name info in netplay.
+
 
 
 
 /* HEALTH DISPLAY */
 	//ACCESS_<variable_type>() is both used for accessing and writing to the resource.
 	//Character variables are in fields.h l.1 "Character class"
-	short p1Health = ACCESS_SHORT(p1, CF_CURRENT_HEALTH);
+	// short p1Health = ACCESS_SHORT(p1, CF_CURRENT_HEALTH);
 	// short p1Spirit = ACCESS_SHORT(p1, CF_CURRENT_SPIRIT);
-	short p2Health = ACCESS_SHORT(p2, CF_CURRENT_HEALTH);
+	// short p2Health = ACCESS_SHORT(p2, CF_CURRENT_HEALTH);
 	// short p2Spirit = ACCESS_SHORT(p2, CF_CURRENT_SPIRIT);
 	
 
@@ -161,6 +163,7 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 		// std::cout << "P1: " << p1Health << "(" << (float) (p1Spirit) / 200 << ")" << wau << nameWau
 			  // << " [VS] P2: " << p2Health << "(" << (float) (p2Spirit) / 200 << ")" << std::endl;
 		// ACCESS_SHORT(p1, CF_CURRENT_HEALTH) = 5000;
+		
 		std::cout << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;
 		
 		SendDiscordRP();
@@ -303,13 +306,28 @@ std::string obtainChar(char charKey)
 
 void SendDiscordRP()
 {	
-	char* gameStatus= new char[128];
-	strcpy(gameStatus, p1name);
-	strcat(gameStatus, " ");
-	strcat(gameStatus, obtainChar(p1char).c_str());
-	strcat(gameStatus, " VS ");
-	strcat(gameStatus, p2name);
-	strcat(gameStatus, obtainChar(p2char).c_str());
-	discordPresence.state = gameStatus;
-	Discord_UpdatePresence(&discordPresence);
+		
+		std::cout << "Start making string" << std::endl;
+		
+		std::string wau;
+		// wau << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;
+		wau.append(p1name);
+		wau.append(" ");
+		wau.append(obtainChar(p1char));
+		wau.append(" VS ");
+		wau.append(p2name);
+		wau.append(" ");
+		wau.append(obtainChar(p2char));
+		
+		
+		std::cout << "Appended" << std::endl;
+		
+		// char* cstr = char[128];
+		std::strcpy(cstr, wau.c_str());
+		discordPresence.state = cstr;
+		Discord_UpdatePresence(&discordPresence);
+		memset(cstr,0,strlen(cstr));
+		
+		
+		std::cout << "Sent!" << std::endl;
 }
