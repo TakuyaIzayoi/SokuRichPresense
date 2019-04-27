@@ -13,6 +13,7 @@
 #include <d3d9.h>
 #include <vector>
 #include <sstream>
+#include <map>
 
 #include "swrs.h"
 #include "fields.h"
@@ -40,6 +41,7 @@ static unsigned long long s_origCBattleManager_OnRender;
 static unsigned long long s_origCBattleManager_OnProcess;
 DiscordRichPresence discordPresence;
 DiscordEventHandlers handlers;
+std::map<char,std::string> Characters;
 
 
 #define ADDR_BMGR_P1 0x0C
@@ -50,6 +52,9 @@ DiscordEventHandlers handlers;
 // OnDestruct is called when leaving the game, or upon re-entering the character select menu (which then calls OnCreate).
 
 // OnRender is called before OnProcess, and loops.
+
+void makeMap();
+std::string obtainChar(char charKey);
 
 void InitDiscord()
 {
@@ -89,17 +94,19 @@ static void NewPresence()
 void* __fastcall CBattleManager_OnCreate(void *This) {
 	CBattleManager_Create(This);
 	std::cout << "OnCreate Called: "<< sizeof(void* (C::*)()) << std::endl;
-
+	
+	
+	InitDiscord();
 	NewPresence();
-	if (g_mainMode == SWRSMODE_PRACTICE)
+	if (g_mainMode == SWRSMODE_VSWATCH)
 	{
-		discordPresence.details = "Practice Mode";
+		discordPresence.details = "Spectating";
 	}
 	else
 	{
 		discordPresence.details = "Some Other Gamemode";
 	}
-	discordPresence.state = "Character Select";
+	// discordPresence.state = "Character Select";
 	Discord_UpdatePresence(&discordPresence);
 	return This;
 }
@@ -126,8 +133,11 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	void* p1 = ACCESS_PTR(battleManager, ADDR_BMGR_P1);	
 	void* p2 = ACCESS_PTR(battleManager, ADDR_BMGR_P2);
 	
+	char p1char= ACCESS_CHAR(p1, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
+	char p2char= ACCESS_CHAR(p2, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
 
-	char wau= ACCESS_CHAR(p1, CF_CHARACTER_INDEX) + 65;
+	char* p1name = g_pprofP1; //gets player name info in netplay.
+	char* p2name = g_pprofP1; //gets player name info in netplay.
 
 
 
@@ -135,16 +145,18 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	//ACCESS_<variable_type>() is both used for accessing and writing to the resource.
 	//Character variables are in fields.h l.1 "Character class"
 	short p1Health = ACCESS_SHORT(p1, CF_CURRENT_HEALTH);
-	short p1Spirit = ACCESS_SHORT(p1, CF_CURRENT_SPIRIT);
+	// short p1Spirit = ACCESS_SHORT(p1, CF_CURRENT_SPIRIT);
 	short p2Health = ACCESS_SHORT(p2, CF_CURRENT_HEALTH);
-	short p2Spirit = ACCESS_SHORT(p2, CF_CURRENT_SPIRIT);
+	// short p2Spirit = ACCESS_SHORT(p2, CF_CURRENT_SPIRIT);
 	
 
 	//Press CTRL, effect visible in VS mode, as practice mode hardsets HP 
 	if (GetKeyState(VK_CONTROL) & 0x8000) {
-		std::cout << "P1: " << p1Health << "(" << (float) (p1Spirit) / 200 << ")" << wau 
-			  << " [VS] P2: " << p2Health << "(" << (float) (p2Spirit) / 200 << ")" << std::endl;
+		// std::cout << "P1: " << p1Health << "(" << (float) (p1Spirit) / 200 << ")" << wau << nameWau
+			  // << " [VS] P2: " << p2Health << "(" << (float) (p2Spirit) / 200 << ")" << std::endl;
 		// ACCESS_SHORT(p1, CF_CURRENT_HEALTH) = 5000;
+		std::cout << p1name << " " << obtainChar(p1char) << " VS " << p2name << " " << (obtainChar(p2char)) << std::endl;
+		
 	}
 
 
@@ -206,7 +218,10 @@ extern "C" {
 	__declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	{
 		OpenConsole(); //debug console
-		InitDiscord();
+		
+		makeMap();
+		
+		// InitDiscord();
 		DWORD old;
 
 		::VirtualProtect((PVOID)text_Offset, text_Size, PAGE_EXECUTE_WRITECOPY, &old);
@@ -243,3 +258,37 @@ g++ Template.cpp -shared -o Template.dll
 
 g++ -std=c++11 *.cpp -shared -D_WIN32_WINNT=0x0501 -o SokuRP.dll
 */
+
+///////Personal Crap
+
+//determines char based on the array.
+void makeMap()
+{
+	Characters.insert(std::make_pair('A',"Reimu"));
+	Characters.insert(std::make_pair('B',"Marisa"));
+	Characters.insert(std::make_pair('C',"Sakuya"));
+	Characters.insert(std::make_pair('D',"Alice"));
+	Characters.insert(std::make_pair('E',"Patchouli"));
+	Characters.insert(std::make_pair('F',"Youmu"));
+	Characters.insert(std::make_pair('G',"Yuyuko"));
+	Characters.insert(std::make_pair('H',"Yukari"));
+	Characters.insert(std::make_pair('I',"Suika"));
+	Characters.insert(std::make_pair('J',"Aya"));
+	Characters.insert(std::make_pair('K',"Reisen"));
+	Characters.insert(std::make_pair('L',"Komachi"));
+	Characters.insert(std::make_pair('M',"Iku"));
+	Characters.insert(std::make_pair('N',"Tenshi"));
+	Characters.insert(std::make_pair('O',"Sanae"));
+	Characters.insert(std::make_pair('P',"Meiling"));
+	Characters.insert(std::make_pair('Q',"Cirno"));
+	Characters.insert(std::make_pair('R',"Suwako"));
+	Characters.insert(std::make_pair('S',"Utsuho"));
+	
+	
+}
+
+std::string obtainChar(char charKey)
+{
+	return Characters[charKey];
+}
+
