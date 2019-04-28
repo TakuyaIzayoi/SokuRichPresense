@@ -22,6 +22,7 @@
 #include "discord_register.h"
 #include "discord_rpc.h"
 
+#include "sokuRichPresence.h"
 
 // Original function calls, needed to create a new game, render, process game loop and destroy game.
 #define CBattleManager_Create(p) \
@@ -40,19 +41,7 @@ static unsigned long long s_origCBattleManager_OnDestruct;
 static unsigned long long s_origCBattleManager_OnRender;
 static unsigned long long s_origCBattleManager_OnProcess;
 
-//Literally other crap to initialize holy shit you'll need a header.
-DiscordRichPresence discordPresence;
-DiscordEventHandlers handlers;
-std::map<char,std::string> Characters;
-void SendDiscordNetplayRP();
-void SendDiscordLocalRP();
-char p1char;
-char p2char;
-char* p1name;
-char* p2name;
-char* cstr = new char[128];
-char* iconKey = new char[32];
-int mutex = 0; 
+
 
 #define ADDR_BMGR_P1 0x0C
 #define ADDR_BMGR_P2 0x10
@@ -63,41 +52,9 @@ int mutex = 0;
 
 // OnRender is called before OnProcess, and loops.
 
-void makeMap();
-std::string obtainChar(char iconKey);
 
-void InitDiscord()
-{
-    memset(&handlers, 0, sizeof(handlers));
-    // handlers.ready = handleDiscordReady;
-    // handlers.errored = handleDiscordError;
-    // handlers.disconnected = handleDiscordDisconnected;
-    // handlers.joinGame = handleDiscordJoinGame;
-    // handlers.spectateGame = handleDiscordSpectateGame;
-    // handlers.joinRequest = handleDiscordJoinRequest;
 
-    // Discord_Initialize(const char* applicationId, DiscordEventHandlers* handlers, int autoRegister, const char* optionalSteamId, int pipe)
-    Discord_Initialize("570515970381185024", &handlers, 1, "1234");
-	
-	
-	memset(&discordPresence, 0, sizeof(discordPresence));
-}
 
-	//sends the update to the application/discord
-	
-static void NewPresence()
-{;
-
-	memset(&discordPresence, 0, sizeof(discordPresence));
-    // discordPresence.state = "Yosu (Marisa)";
-    // discordPresence.details = "Thiena (Aya)";
-    discordPresence.largeImageKey = "sokuicon";
-    // discordPresence.largeImageText = "placeholder";
-    // discordPresence.partyId = "ae488379-351d-4a4f-ad32-2b9b01c91657";
-    // discordPresence.spectateSecret = "MTIzNDV8MTIzNDV8MTMyNDU0"; //can prob use for spectating games. WOW
-    // discordPresence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM= ";//can prob be used for hosting games.
-    Discord_UpdatePresence(&discordPresence);
-}
 
 
 void* __fastcall CBattleManager_OnCreate(void *This) {
@@ -423,4 +380,37 @@ void SendDiscordLocalRP()
 		
 		
 		// std::cout << "Sent!" << std::endl;
+}
+
+void InitDiscord()
+{
+    memset(&handlers, 0, sizeof(handlers));
+    // handlers.ready = handleDiscordReady;
+    // handlers.errored = handleDiscordError;
+    // handlers.disconnected = handleDiscordDisconnected;
+    // handlers.joinGame = handleDiscordJoinGame;
+    // handlers.spectateGame = handleDiscordSpectateGame;
+    // handlers.joinRequest = handleDiscordJoinRequest;
+
+    // Discord_Initialize(const char* applicationId, DiscordEventHandlers* handlers, int autoRegister, const char* optionalSteamId, int pipe)
+    Discord_Initialize("570515970381185024", &handlers, 1, "1234");
+	
+	
+	memset(&discordPresence, 0, sizeof(discordPresence));
+}
+
+	//sends the update to the application/discord
+	
+static void NewPresence()
+{;
+
+	memset(&discordPresence, 0, sizeof(discordPresence));
+    // discordPresence.state = "Yosu (Marisa)";
+    // discordPresence.details = "Thiena (Aya)";
+    discordPresence.largeImageKey = "sokuicon";
+    // discordPresence.largeImageText = "placeholder";
+    // discordPresence.partyId = "ae488379-351d-4a4f-ad32-2b9b01c91657";
+    // discordPresence.spectateSecret = "MTIzNDV8MTIzNDV8MTMyNDU0"; //can prob use for spectating games. WOW
+    // discordPresence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM= ";//can prob be used for hosting games.
+    Discord_UpdatePresence(&discordPresence);
 }
