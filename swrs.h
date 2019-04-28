@@ -1,6 +1,8 @@
 #ifndef SWRS_H_INCLUDED
 #define SWRS_H_INCLUDED
 
+#define novtable
+
 // ---------------- §≥§≥§´§È•∆•Û•◊•ÅE----------------
 
 /*
@@ -455,6 +457,7 @@ Ccall(ppfile, 0x0040CD90, bool, (LPCSTR))(name)
 #define g_profP1    ((void *)0x00885848)
 #define g_profP2    ((void *)0x00886034)
 */
+
 // •‚©`•…
 // int
 #define g_mainMode   (*reinterpret_cast<DWORD *>(ADDR_COMM_MODE))
@@ -465,6 +468,7 @@ Ccall(ppfile, 0x0040CD90, bool, (LPCSTR))(name)
 #define g_sceneIdNew (*reinterpret_cast<DWORD*>(ADDR_SCENE_ID_NEW))
 #define g_sceneId    (*reinterpret_cast<DWORD*>(ADDR_SCENE_ID))
 /*
+
 // •≥•Û•–©`•»•«©`•ø¿˚”√•’•È•∞
 // bool
 #define g_useCVxData (*(bool*)0x0088D028)
@@ -472,6 +476,7 @@ Ccall(ppfile, 0x0040CD90, bool, (LPCSTR))(name)
 // void *
 #define g_paletter   (*(void **)0x00883B88)
 */
+
 // •§•Û•◊•√•»•ﬁ•Õ©`•∏•ÅE
 // CInputManager ?
 #define g_inputMgr   reinterpret_cast<void *>(ADDR_INPUT_MANAGER)
@@ -483,11 +488,13 @@ Ccall(ppfile, 0x0040CD90, bool, (LPCSTR))(name)
 #define g_leftCharID (*reinterpret_cast<int*>(ADDR_LCHARID))
 #define g_rightCharID (*reinterpret_cast<int*>(ADDR_RCHARID))
 /*
+
 // argc/argv
 #define __argc       (*(int*)0x00887B38)
 #define __argv       (*(char***)0x00887B3C)
-
 */
+
+
 // Å¢œÅEv ˝•∆©`•÷•ÅE
 #define vtbl_CLogo                ADDR_VTBL_LOGO
 /*
@@ -530,19 +537,25 @@ Ccall(ppfile, 0x0040CD90, bool, (LPCSTR))(name)
 #define CBattle_Creater         0x0041DC60
 #define Ending_Creater          0x0041DC9A
 */
+
 #define CSelectSV_Creater       ADDR_SELECT_SV_CREATER
+
 /*
 #define CLoadingSV_Creater      0x0041DD0E
 #define CBattleSV_Creater       0x0041DD45
 */
+
 #define CSelectCL_Creater       ADDR_SELECT_CL_CREATER
+
 /*
 #define CLoadingCL_Creater      0x0041DDB9
 #define CBattleCL_Creater       0x0041DDF0
 #define CLoadingWatch_Creater   0x0041DE26
 #define CBattleWatch_Creater    0x0041DE59
 */
+
 #define CBattleManager_Creater  ADDR_BATTLE_MANAGER_CREATER
+
 /*
 
 // •Ø•È•π•µ•§•∫•™•⁄•È•Û•…
@@ -555,18 +568,23 @@ Ccall(ppfile, 0x0040CD90, bool, (LPCSTR))(name)
 #define CBattle_Size            (*(BYTE *)0x0041DC41)
 #define Ending_Size             (*(DWORD*)0x0041DC78)
 */
+
 #define CSelectSV_Size          (*reinterpret_cast<DWORD *>(ADDR_SELECT_SV_SIZE))
+
 /*
 #define CLoadingSV_Size         (*(DWORD*)0x0041DCEC)
 #define CBattleSV_Size          (*(BYTE *)0x0041DD26)
 */
+
 #define CSelectCL_Size          (*reinterpret_cast<DWORD *>(ADDR_SELECT_CL_SIZE))
+
 /*
 #define CLoadingCL_Size         (*(DWORD*)0x0041DD97)
 #define CBattleCL_Size          (*(BYTE *)0x0041DDD1)
 #define CLoadingWatch_Size      (*(DWORD*)0x0041DE08)
 #define CBattleWatch_Size       (*(BYTE *)0x0041DE3E)
 */
+
 #define CBattleManager_Size     (*reinterpret_cast<DWORD *>(ADDR_BATTLE_MANAGER_SIZE))
 
 // •ª•Ø•∑•Á•Û•µ•§•∫

@@ -121,6 +121,7 @@ private:
             using namespace std;
             // throw system_error(make_error_code(errc::protocol_error));
         }
+		return 0;
     }
 public:
     template <class M>
