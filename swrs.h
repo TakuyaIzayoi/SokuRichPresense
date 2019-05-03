@@ -448,9 +448,6 @@ Ccall(ppfile, 0x0040CD90, bool, (LPCSTR))(name)
 // •µ©`•–•¢•…•ÅEπ
 // in_addr
 #define g_ptoAddr    (g_pnetUdp + 0x3C)
-
-
-
 // •–•»•ÅEﬁ•Õ©`•∏•ÅE
 // CBattleManager *
 #define g_pbattleMgr (*reinterpret_cast<void **>(ADDR_BATTLE_MANAGER))

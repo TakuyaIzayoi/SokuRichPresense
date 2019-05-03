@@ -36,7 +36,6 @@
 #define CBattleManager_Destruct(p, dyn) \
   Ccall(p, s_origCBattleManager_OnDestruct, void*, (int))(dyn);
 
-
 // These hold the reference to the instruction memory where the original game function lives. 
 // unsigned long long stands for the DWORD (which is 4bytes for some reason on this machine)
 static unsigned long long s_origCBattleManager_OnCreate;
@@ -61,6 +60,7 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 	std::cout << "OnCreate Called: "<< sizeof(void* (C::*)()) << std::endl;
 	
 	
+	InitDiscord();
 	NewPresence();
 	
 	
@@ -86,8 +86,8 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 	else if (g_mainMode == SWRSMODE_PRACTICE)
 	{
 		discordPresence.details = "Practice Mode";
-		// discordPresence.state = "Character Select";
-		// discordPresence.startTimestamp = time(NULL);
+		discordPresence.state = "Character Select";
+		discordPresence.startTimestamp = time(NULL);
 		// p1name = g_profP1; //gets player name info in netplay.
 		// p2name = g_pprofP2; //gets player name info in netplay.
 	}
@@ -95,8 +95,8 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 	else
 	{
 		discordPresence.details = "Some Other Gamemode";
-		// discordPresence.state = "Character Select";
-		// discordPresence.startTimestamp = time(NULL);
+		discordPresence.state = "Character Select";
+		discordPresence.startTimestamp = time(NULL);
 		// p1name = g_profP1; //gets player name info in non netplay.
 	}
 	// discordPresence.state = "Character Select";
@@ -121,7 +121,7 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 void __fastcall CBattleManager_OnRender(void *This) {
 	CBattleManager_Render(This);
 	
-	// std::cout << "print render" << std::endl;
+
 
 }
 
@@ -231,9 +231,6 @@ void* __fastcall CBattleManager_OnDestruct(void *This, int mystery, int dyn) {
 	return ret;
 }
 
-
-
-
 void OpenConsole() {
 	if (AllocConsole()) {
 		FILE* stream; // initializing this makes the game crash, but not doing so causes a warning, hence the pragma
@@ -261,7 +258,6 @@ extern "C" {
 	__declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule)
 	{
 		OpenConsole(); //debug console
-		InitDiscord();
 		
 		// InitDiscord();
 		DWORD old;
@@ -271,7 +267,6 @@ extern "C" {
 		s_origCBattleManager_OnCreate =
 			TamperNearJmpOpr(CBattleManager_Creater, union_cast<DWORD>(CBattleManager_OnCreate));
 		
-
 		::VirtualProtect((PVOID)text_Offset, text_Size, old, &old);
 		::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_WRITECOPY, &old);
 		
@@ -384,23 +379,19 @@ void SendDiscordLocalRP()
 
 void InitDiscord()
 {
-    DiscordEventHandlers handlers;
     memset(&handlers, 0, sizeof(handlers));
-    // handlers.ready = ready();
-    // handlers.errored = errored();
-    // handlers.disconnected = disconnected();
-    // handlers.joinGame = joinGame();
-    // handlers.spectateGame = spectateGame();
-    // handlers.joinRequest = joinRequest();
+    // handlers.ready = handleDiscordReady;
+    // handlers.errored = handleDiscordError;
+    // handlers.disconnected = handleDiscordDisconnected;
+    // handlers.joinGame = handleDiscordJoinGame;
+    // handlers.spectateGame = handleDiscordSpectateGame;
+    // handlers.joinRequest = handleDiscordJoinRequest;
 
     // Discord_Initialize(const char* applicationId, DiscordEventHandlers* handlers, int autoRegister, const char* optionalSteamId, int pipe)
     Discord_Initialize("570515970381185024", &handlers, 1, "1234");
 	
 	
 	memset(&discordPresence, 0, sizeof(discordPresence));
-	
-	
-
 }
 
 	//sends the update to the application/discord
@@ -413,10 +404,8 @@ static void NewPresence()
     // discordPresence.details = "Thiena (Aya)";
     discordPresence.largeImageKey = "sokuicon";
     // discordPresence.largeImageText = "placeholder";
-	
-	
-    discordPresence.partyId = "ae488379-351d-4a4f-ad32-2b9b01c91657";
-    discordPresence.spectateSecret = "MTIzNDV8MTIzNDV8MTMyNDU0"; //can prob use for spectating games. WOW
-    discordPresence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM= ";//can prob be used for hosting games.
+    // discordPresence.partyId = "ae488379-351d-4a4f-ad32-2b9b01c91657";
+    // discordPresence.spectateSecret = "MTIzNDV8MTIzNDV8MTMyNDU0"; //can prob use for spectating games. WOW
+    // discordPresence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM= ";//can prob be used for hosting games.
     Discord_UpdatePresence(&discordPresence);
 }
