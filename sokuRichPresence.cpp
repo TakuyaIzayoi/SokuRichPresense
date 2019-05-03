@@ -1,10 +1,12 @@
 #define SWRS_USES_HASH
 
+//C Stuff
 #include <cstring>
 #include <cstdlib>
 #include <string>
 #include <ctime>
 
+//Standard Stuff
 #include <string.h>
 #include <windows.h>
 #include <mmsystem.h>
@@ -15,10 +17,12 @@
 #include <sstream>
 #include <map>
 
+//Soku Stuff
 #include "swrs.h"
 #include "fields.h"
 #include "address.h"
 
+//Discord
 #include "discord_register.h"
 #include "discord_rpc.h"
 
