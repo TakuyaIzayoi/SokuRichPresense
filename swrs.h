@@ -430,6 +430,8 @@ Ccall(ppfile, 0x0040CD90, bool, (LPCSTR))(name)
 // •ÅEÛ•¿•ÅE
 // CRenderer
 #define g_renderer   reinterpret_cast<void *>(ADDR_RENDERER)
+
+
 // •Õ•√•»•ÅE`•Ø•™•÷•∏•ß•Ø•»
 // CNetworkServer/CNetworkClient
 #define g_pnetObject (*reinterpret_cast<char**>(ADDR_PNETOBJECT))

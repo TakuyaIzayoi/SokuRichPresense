@@ -1,5 +1,6 @@
 #define SWRS_USES_HASH
 
+//C-Related Stuff
 #include <cstring>
 #include <cstdlib>
 #include <string>
@@ -15,6 +16,7 @@
 #include <sstream>
 #include <map>
 
+//Soku Related Items
 #include "swrs.h"
 #include "fields.h"
 #include "address.h"
@@ -32,10 +34,8 @@
 #define CBattleManager_Process(p) \
   Ccall(p, s_origCBattleManager_OnProcess, int, ())()
 #define CBattleManager_Destruct(p, dyn) \
-  Ccall(p, s_origCBattleManager_OnDestruct, void*, (int))(dyn)
+  Ccall(p, s_origCBattleManager_OnDestruct, void*, (int))(dyn);
 
-#define CSelect_Create(p) \
-  Ccall(p, s_origCSelect_OnCreate, void*, ())()
 
 // These hold the reference to the instruction memory where the original game function lives. 
 // unsigned long long stands for the DWORD (which is 4bytes for some reason on this machine)
@@ -43,8 +43,6 @@ static unsigned long long s_origCBattleManager_OnCreate;
 static unsigned long long s_origCBattleManager_OnDestruct;
 static unsigned long long s_origCBattleManager_OnRender;
 static unsigned long long s_origCBattleManager_OnProcess;
-
-static unsigned long long s_origCSelect_OnCreate;
 
 #define ADDR_BMGR_P1 0x0C
 #define ADDR_BMGR_P2 0x10
@@ -233,12 +231,7 @@ void* __fastcall CBattleManager_OnDestruct(void *This, int mystery, int dyn) {
 	return ret;
 }
 
-void __fastcall CSelect_OnCreate(void *This) {
-	CSelect_Create(This);
-	
-	std::cout << "print character select" << std::endl;
 
-}
 
 
 void OpenConsole() {
@@ -270,8 +263,6 @@ extern "C" {
 		OpenConsole(); //debug console
 		InitDiscord();
 		
-		makeMap();
-		
 		// InitDiscord();
 		DWORD old;
 
@@ -280,9 +271,7 @@ extern "C" {
 		s_origCBattleManager_OnCreate =
 			TamperNearJmpOpr(CBattleManager_Creater, union_cast<DWORD>(CBattleManager_OnCreate));
 		
-		s_origCSelect_OnCreate =
-			TamperNearJmpOpr(ADDR_SELECT_CREATER, union_cast<DWORD>(CSelect_OnCreate));
-		
+
 		::VirtualProtect((PVOID)text_Offset, text_Size, old, &old);
 		::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_WRITECOPY, &old);
 		
@@ -324,31 +313,7 @@ g++ -std=c++11 *.cpp -shared -D_WIN32_WINNT=0x0501 -o SokuRP.dll
 ///////Personal Crap
 
 //determines char based on the array.
-void makeMap()
-{
-	Characters.insert(std::make_pair('A',"Reimu"));
-	Characters.insert(std::make_pair('B',"Marisa"));
-	Characters.insert(std::make_pair('C',"Sakuya"));
-	Characters.insert(std::make_pair('D',"Alice"));
-	Characters.insert(std::make_pair('E',"Patchouli"));
-	Characters.insert(std::make_pair('F',"Youmu"));
-	Characters.insert(std::make_pair('G',"Remilia"));
-	Characters.insert(std::make_pair('H',"Yuyuko"));
-	Characters.insert(std::make_pair('I',"Yukari"));
-	Characters.insert(std::make_pair('J',"Suika"));
-	Characters.insert(std::make_pair('K',"Aya"));
-	Characters.insert(std::make_pair('L',"Reisen"));
-	Characters.insert(std::make_pair('M',"Komachi"));
-	Characters.insert(std::make_pair('N',"Iku"));
-	Characters.insert(std::make_pair('O',"Tenshi"));
-	Characters.insert(std::make_pair('P',"Sanae"));
-	Characters.insert(std::make_pair('Q',"Cirno"));
-	Characters.insert(std::make_pair('R',"Meiling"));
-	Characters.insert(std::make_pair('S',"Utsuho"));
-	Characters.insert(std::make_pair('T',"Suwako"));
-	
-	
-}
+
 
 std::string obtainChar(char iconKey)
 {
