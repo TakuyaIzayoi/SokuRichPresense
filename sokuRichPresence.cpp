@@ -43,8 +43,6 @@ static unsigned long long s_origCBattleManager_OnDestruct;
 static unsigned long long s_origCBattleManager_OnRender;
 static unsigned long long s_origCBattleManager_OnProcess;
 
-
-
 #define ADDR_BMGR_P1 0x0C
 #define ADDR_BMGR_P2 0x10
 
@@ -53,8 +51,6 @@ static unsigned long long s_origCBattleManager_OnProcess;
 // OnDestruct is called when leaving the game, or upon re-entering the character select menu (which then calls OnCreate).
 
 // OnRender is called before OnProcess, and loops.
-
-
 
 
 
@@ -90,6 +86,8 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 	else if (g_mainMode == SWRSMODE_PRACTICE)
 	{
 		discordPresence.details = "Practice Mode";
+		discordPresence.state = "Character Select";
+		discordPresence.startTimestamp = time(NULL);
 		// p1name = g_profP1; //gets player name info in netplay.
 		// p2name = g_pprofP2; //gets player name info in netplay.
 	}
@@ -97,6 +95,8 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 	else
 	{
 		discordPresence.details = "Some Other Gamemode";
+		discordPresence.state = "Character Select";
+		discordPresence.startTimestamp = time(NULL);
 		// p1name = g_profP1; //gets player name info in non netplay.
 	}
 	// discordPresence.state = "Character Select";
@@ -104,8 +104,15 @@ void* __fastcall CBattleManager_OnCreate(void *This) {
 
 	
 	
-	Discord_UpdatePresence(&discordPresence);
-	
+	// Discord_UpdatePresence(&discordPresence);
+	if (mutex == 0)
+	{
+		discordPresence.state = "Character Select";
+		discordPresence.startTimestamp = time(NULL);
+		mutex = 1;
+		Discord_UpdatePresence(&discordPresence);
+		// SendDiscordLocalRP();
+	}
 	
 	return This;
 }
@@ -139,16 +146,21 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	p1char = ACCESS_CHAR(p1, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
 	p2char = ACCESS_CHAR(p2, CF_CHARACTER_INDEX) + 65; //starts from the letter A.
 
-	// if (g_sceneId == SWRSSCENE_SELECT)
-	// {
-		// discordPresence.state = "Character Select";
-	// }
-	if (g_sceneId == SWRSSCENE_BATTLE && mutex == 0) //will be your mutex for combat.
+
+	if (g_sceneId == SWRSSCENE_BATTLE && mutex == 1) //will be your mutex for combat.
 	{
 		// discordPresence.state = "In Combat";
 		discordPresence.startTimestamp = time(NULL);
-		mutex = 1;
+		mutex = 0;
 		SendDiscordLocalRP();
+	}
+
+	if (g_sceneId != SWRSSCENE_BATTLE && mutex == 0) //will be your mutex for combat.
+	{
+		discordPresence.state = "Char Select";
+		discordPresence.startTimestamp = time(NULL);
+		mutex = 1;
+		Discord_UpdatePresence(&discordPresence);
 	}
 
 	// if (g_sceneId != SWRSSCENE_BATTLE && mutex == 1) //will be your mutex for combat.
@@ -210,7 +222,7 @@ void* __fastcall CBattleManager_OnDestruct(void *This, int mystery, int dyn) {
 	void* ret;
 	ret = CBattleManager_Destruct(This, dyn);
 	std::cout << "OnDestruct Called" << std::endl;
-	
+	mutex = 0;
 	// NewPresence();
 	// discordPresence.details = "Character Select";
 	// Discord_UpdatePresence(&discordPresence);
@@ -251,19 +263,27 @@ extern "C" {
 		DWORD old;
 
 		::VirtualProtect((PVOID)text_Offset, text_Size, PAGE_EXECUTE_WRITECOPY, &old);
+		
 		s_origCBattleManager_OnCreate =
 			TamperNearJmpOpr(CBattleManager_Creater, union_cast<DWORD>(CBattleManager_OnCreate));
+		
 		::VirtualProtect((PVOID)text_Offset, text_Size, old, &old);
 		::VirtualProtect((PVOID)rdata_Offset, rdata_Size, PAGE_WRITECOPY, &old);
+		
 		s_origCBattleManager_OnDestruct =
 			TamperDword(vtbl_CBattleManager + 0x00, union_cast<DWORD>(CBattleManager_OnDestruct));
+		
 		s_origCBattleManager_OnRender =
 			TamperDword(vtbl_CBattleManager + 0x38, union_cast<DWORD>(CBattleManager_OnRender));
+		
 		s_origCBattleManager_OnProcess =
 			TamperDword(vtbl_CBattleManager + 0x0c, union_cast<DWORD>(CBattleManager_OnProcess));
+		
 		::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
+		
 		::FlushInstructionCache(GetCurrentProcess(), NULL, 0);
 
+		std::cout << "print benis" << std::endl;
 		return true;
 	}
 }
