@@ -16,6 +16,7 @@
 #include <vector>
 #include <sstream>
 #include <map>
+#include <algorithm>
 
 //Soku Stuff
 #include "swrs.h"
@@ -37,6 +38,29 @@
   Ccall(p, s_origCBattleManager_OnProcess, int, ())()
 #define CBattleManager_Destruct(p, dyn) \
   Ccall(p, s_origCBattleManager_OnDestruct, void*, (int))(dyn)
+  
+// Literally Ripped from NetBattleCounter -- Allows to count select screen.
+#define CSelectSV_Create(p) \
+	Ccall(p, s_origCSelectSV_Create, void*, ())()
+#define CSelectSV_Render(p) \
+	Ccall(p, s_origCSelectSV_Render, int, ())()
+#define CSelectSV_Destruct(p, dyn) \
+	Ccall(p, s_origCSelectSV_Destruct, void*, (int))(dyn)
+#define CSelectCL_Create(p) \
+	Ccall(p, s_origCSelectCL_Create, void*, ())()
+#define CSelectCL_Render(p) \
+	Ccall(p, s_origCSelectCL_Render, int, ())()
+#define CSelectCL_Destruct(p, dyn) \
+	Ccall(p,s_origCSelectCL_Destruct,void*, (int))(dyn)
+	
+#define CSelect_Create(p) \
+	Ccall(p, s_origCSelect_Create, void*, ())()
+#define CSelect_Render(p) \
+	Ccall(p, s_origCSelect_Render, int, ())()
+#define CSelect_Destruct(p, dyn) \
+	Ccall(p, s_origCSelect_Destruct, void*, (int))(dyn)
+	
+#define CSelect_Size          (*reinterpret_cast<DWORD *>(ADDR_SELECT_SV_SIZE))
 
 // These hold the reference to the instruction memory where the original game function lives. 
 // unsigned long long stands for the DWORD (which is 4bytes for some reason on this machine)
@@ -45,65 +69,129 @@ static unsigned long long s_origCBattleManager_OnDestruct;
 static unsigned long long s_origCBattleManager_OnRender;
 static unsigned long long s_origCBattleManager_OnProcess;
 
+//variables from NetBattleCounter
+static DWORD s_origCSelectSV_Create;
+static DWORD s_origCSelectSV_Render;
+static DWORD s_origCSelectSV_Destruct;
+static DWORD s_origCSelectCL_Create;
+static DWORD s_origCSelectCL_Render;
+static DWORD s_origCSelectCL_Destruct;
+static DWORD s_origCSelect_Size;
+
+
+static DWORD s_origCSelect_Create;
+static DWORD s_origCSelect_Render;
+static DWORD s_origCSelect_Destruct;
+
 #define ADDR_BMGR_P1 0x0C
 #define ADDR_BMGR_P2 0x10
 
 
 // OnCreate is called when entering character select menu.
 // OnDestruct is called when leaving the game, or upon re-entering the character select menu (which then calls OnCreate).
-
 // OnRender is called before OnProcess, and loops.
 
+/*
+Character Select
+*/
+
+//all CSelect functions will call to This.
+void * __fastcall CSelectCommon_OnCreate(void *This)
+{
+	matchCounter++;
+	std::cout << "MatchCount: " << matchCounter << std::endl;
+	return This;
+}
+
+void * __fastcall CSelectSV_OnCreate(void *This)
+{
+	// super
+	CSelectSV_Create(This);
+	return CSelectCommon_OnCreate(This);
+}
+
+void * __fastcall CSelectCL_OnCreate(void *This)
+{
+	// super
+	CSelectCL_Create(This);
+	return CSelectCommon_OnCreate(This);
+}
+
+void * __fastcall CSelect_OnCreate(void *This)
+{
+	// super
+	CSelect_Create(This);
+	return CSelectCommon_OnCreate(This);
+}
+
+//All Cselect functions On Render will call to this.
+void __fastcall CSelectCommon_OnRender(void *This)
+{
+	// int &m_texID = *(int *)((char *)This + s_origCSelect_Size + 0x00);
+}
+
+int __fastcall CSelectSV_OnRender(void *This)
+{
+	// super
+	int ret = CSelectSV_Render(This);
+	CSelectCommon_OnRender(This);
+	return ret;
+}
+
+int __fastcall CSelectCL_OnRender(void *This)
+{
+	// super
+	int ret = CSelectCL_Render(This);
+	CSelectCommon_OnRender(This);
+	return ret;
+}
+
+int __fastcall CSelect_OnRender(void *This)
+{
+	// super
+	int ret = CSelect_Render(This);
+	CSelectCommon_OnRender(This);
+	return ret;
+}
+
+// All CSelect Functions should call to this one.
+void __fastcall CSelectCommon_OnDestruct(void *This)
+{
+	// int &m_texID = *(int *)((char *)This + s_origCSelect_Size + 0x00);
+	// CTextureManager_Remove(g_textureMgr, m_texID);
+}
+
+void * __fastcall CSelectSV_OnDestruct(void *This, int, int dyn)
+{
+	CSelectCommon_OnDestruct(This);
+	return CSelectSV_Destruct(This, dyn);
+}
+
+void * __fastcall CSelectCL_OnDestruct(void *This, int, int dyn)
+{
+	CSelectCommon_OnDestruct(This);
+	return CSelectCL_Destruct(This, dyn);
+}
+
+void * __fastcall CSelect_OnDestruct(void *This, int, int dyn)
+{
+	CSelectCommon_OnDestruct(This);
+	return CSelect_Destruct(This, dyn);
+}
 
 
+/*
+Battle Manager
+*/
 
 void* __fastcall CBattleManager_OnCreate(void *This) {
 	CBattleManager_Create(This);
 	std::cout << "OnCreate Called: "<< sizeof(void* (C::*)()) << std::endl;
 	
 	
-	InitDiscord();
-	NewPresence();
+	// InitDiscord();
+	// NewPresence();
 	
-	
-	if (g_mainMode == SWRSMODE_VSCLIENT)
-	{
-		discordPresence.details = "VS Network (P1)";
-		p1name = g_pprofP1; //gets player name info in netplay.
-		p2name = g_pprofP2; //gets player name info in netplay.
-	}
-	else if (g_mainMode == SWRSMODE_VSSERVER)
-	{
-		discordPresence.details = "VS Network (P2)";
-		p1name = g_pprofP1; //gets player name info in netplay.
-		p2name = g_pprofP2; //gets player name info in netplay.
-	}
-	else if (g_mainMode == SWRSMODE_VSWATCH)
-	{
-		discordPresence.details = "Spectating";
-		p1name = g_pprofP1; //gets player name info in netplay.
-		p2name = g_pprofP2; //gets player name info in netplay.
-	}
-
-	else if (g_mainMode == SWRSMODE_PRACTICE)
-	{
-		discordPresence.details = "Practice Mode";
-		discordPresence.state = "Character Select";
-		discordPresence.startTimestamp = time(NULL);
-		// p1name = g_profP1; //gets player name info in netplay.
-		// p2name = g_pprofP2; //gets player name info in netplay.
-	}
-	
-	else
-	{
-		discordPresence.details = "Some Other Gamemode";
-		discordPresence.state = "Character Select";
-		discordPresence.startTimestamp = time(NULL);
-		// p1name = g_profP1; //gets player name info in non netplay.
-	}
-	// discordPresence.state = "Character Select";
-	
-
 	
 	
 	// Discord_UpdatePresence(&discordPresence);
@@ -132,10 +220,7 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 	int ret;
 	ret = CBattleManager_Process(This);
 	int battleManager = ACCESS_INT(ADDR_BATTLE_MANAGER, 0);
-	
-
-	
-	
+		
 	// discordPresence.state = "Yosu (Marisa)";
     // discordPresence.details = "Thiena (Aya)";	
 	// discordPresence.startTimestamp = time(NULL);
@@ -157,13 +242,6 @@ int __fastcall CBattleManager_OnProcess(void *This) {
 		SendDiscordLocalRP();
 	}
 
-	if (g_sceneId != SWRSSCENE_BATTLE && mutex == 0) //will be your mutex for combat.
-	{
-		discordPresence.state = "Char Select";
-		discordPresence.startTimestamp = time(NULL);
-		mutex = 1;
-		Discord_UpdatePresence(&discordPresence);
-	}
 
 	// if (g_sceneId != SWRSSCENE_BATTLE && mutex == 1) //will be your mutex for combat.
 	// {
@@ -269,6 +347,19 @@ extern "C" {
 
 		::VirtualProtect((PVOID)text_Offset, text_Size, PAGE_EXECUTE_WRITECOPY, &old);
 		
+		//charSelect
+		s_origCSelect_Size = std::max(CSelectSV_Size, CSelectCL_Size);
+		CSelectSV_Size = s_origCSelect_Size + 4;
+		CSelectCL_Size = s_origCSelect_Size + 4;
+		
+		s_origCSelect_Create = 
+			TamperNearJmpOpr(0x0041DBEF, union_cast<DWORD>(CSelect_OnCreate));
+		s_origCSelectSV_Create = 
+			TamperNearJmpOpr(CSelectSV_Creater, union_cast<DWORD>(CSelectSV_OnCreate));
+		s_origCSelectCL_Create =
+			TamperNearJmpOpr(CSelectCL_Creater, union_cast<DWORD>(CSelectCL_OnCreate));	
+		
+		//battleManager
 		s_origCBattleManager_OnCreate =
 			TamperNearJmpOpr(CBattleManager_Creater, union_cast<DWORD>(CBattleManager_OnCreate));
 		
@@ -283,6 +374,20 @@ extern "C" {
 		
 		s_origCBattleManager_OnProcess =
 			TamperDword(vtbl_CBattleManager + 0x0c, union_cast<DWORD>(CBattleManager_OnProcess));
+			
+		s_origCSelectSV_Destruct = 
+			TamperDword(vtbl_CSelectSV + 0x00, union_cast<DWORD>(CSelectSV_OnDestruct));
+		s_origCSelectSV_Render = 
+			TamperDword(vtbl_CSelectSV + 0x08, union_cast<DWORD>(CSelectSV_OnRender));
+		s_origCSelectCL_Destruct = 
+			TamperDword(vtbl_CSelectCL + 0x00, union_cast<DWORD>(CSelectCL_OnDestruct));
+		s_origCSelectCL_Render =
+			TamperDword(vtbl_CSelectCL + 0x08, union_cast<DWORD>(CSelectCL_OnRender));	
+			
+		s_origCSelect_Destruct = 
+			TamperDword(0x00846D18 + 0x00, union_cast<DWORD>(CSelect_OnDestruct));
+		s_origCSelect_Render = 
+			TamperDword(0x00846D18 + 0x08, union_cast<DWORD>(CSelect_OnRender));			
 		
 		::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
 		
@@ -426,7 +531,7 @@ void InitDiscord()
 	//sends the update to the application/discord
 	
 static void NewPresence()
-{;
+{
 
 	memset(&discordPresence, 0, sizeof(discordPresence));
     // discordPresence.state = "Yosu (Marisa)";
@@ -438,3 +543,43 @@ static void NewPresence()
     // discordPresence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM= ";//can prob be used for hosting games.
     Discord_UpdatePresence(&discordPresence);
 }
+
+void CheckGamemode()
+{	
+	if (g_mainMode == SWRSMODE_VSCLIENT)
+	{
+		discordPresence.details = "VS Network (P1)";
+		p1name = g_pprofP1; //gets player name info in netplay.
+		p2name = g_pprofP2; //gets player name info in netplay.
+	}
+	else if (g_mainMode == SWRSMODE_VSSERVER)
+	{
+		discordPresence.details = "VS Network (P2)";
+		p1name = g_pprofP1; //gets player name info in netplay.
+		p2name = g_pprofP2; //gets player name info in netplay.
+	}
+	else if (g_mainMode == SWRSMODE_VSWATCH)
+	{
+		discordPresence.details = "Spectating";
+		p1name = g_pprofP1; //gets player name info in netplay.
+		p2name = g_pprofP2; //gets player name info in netplay.
+	}
+
+	else if (g_mainMode == SWRSMODE_PRACTICE)
+	{
+		discordPresence.details = "Practice Mode";
+		discordPresence.state = "Character Select";
+		discordPresence.startTimestamp = time(NULL);
+		// p1name = g_profP1; //gets player name info in netplay.
+		// p2name = g_pprofP2; //gets player name info in netplay.
+	}
+	
+	else
+	{
+		discordPresence.details = "Some Other Gamemode";
+		discordPresence.state = "Character Select";
+		discordPresence.startTimestamp = time(NULL);
+		// p1name = g_profP1; //gets player name info in non netplay.
+	}
+}
+

@@ -556,6 +556,7 @@ Ccall(ppfile, 0x0040CD90, bool, (LPCSTR))(name)
 
 #define CBattleManager_Creater  ADDR_BATTLE_MANAGER_CREATER
 
+
 /*
 
 // クラスサイズオペランド

@@ -17,9 +17,15 @@ char* iconKey = new char[32];
 int mutex = 0; 
 void makeMap();
 
+int matchCounter = 0;
+
 //Functional Functions
+
 std::string obtainChar(char iconKey);
+
 void SendDiscordNetplayRP();
 void SendDiscordLocalRP();
 void InitDiscord();
 static void NewPresence();
+
+void CheckGamemode();
