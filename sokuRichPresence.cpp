@@ -70,18 +70,18 @@ static unsigned long long s_origCBattleManager_OnRender;
 static unsigned long long s_origCBattleManager_OnProcess;
 
 //variables from NetBattleCounter
-static DWORD s_origCSelectSV_Create;
-static DWORD s_origCSelectSV_Render;
-static DWORD s_origCSelectSV_Destruct;
-static DWORD s_origCSelectCL_Create;
-static DWORD s_origCSelectCL_Render;
-static DWORD s_origCSelectCL_Destruct;
-static DWORD s_origCSelect_Size;
+static unsigned long long s_origCSelectSV_Create;
+static unsigned long long s_origCSelectSV_Render;
+static unsigned long long s_origCSelectSV_Destruct;
+static unsigned long long s_origCSelectCL_Create;
+static unsigned long long s_origCSelectCL_Render;
+static unsigned long long s_origCSelectCL_Destruct;
+static unsigned long long s_origCSelect_Size;
 
 
-static DWORD s_origCSelect_Create;
-static DWORD s_origCSelect_Render;
-static DWORD s_origCSelect_Destruct;
+static unsigned long long s_origCSelect_Create;
+static unsigned long long s_origCSelect_Render;
+static unsigned long long s_origCSelect_Destruct;
 
 #define ADDR_BMGR_P1 0x0C
 #define ADDR_BMGR_P2 0x10
