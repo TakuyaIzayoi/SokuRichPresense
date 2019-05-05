@@ -53,14 +53,14 @@
 #define CSelectCL_Destruct(p, dyn) \
 	Ccall(p,s_origCSelectCL_Destruct,void*, (int))(dyn)
 	
-#define CSelect_Create(p) \
-	Ccall(p, s_origCSelect_Create, void*, ())()
-#define CSelect_Render(p) \
-	Ccall(p, s_origCSelect_Render, int, ())()
-#define CSelect_Destruct(p, dyn) \
-	Ccall(p, s_origCSelect_Destruct, void*, (int))(dyn)
+// #define CSelect_Create(p) \
+	// Ccall(p, s_origCSelect_Create, void*, ())()
+// #define CSelect_Render(p) \
+	// Ccall(p, s_origCSelect_Render, int, ())()
+// #define CSelect_Destruct(p, dyn) \
+	// Ccall(p, s_origCSelect_Destruct, void*, (int))(dyn)
 	
-#define CSelect_Size          (*reinterpret_cast<DWORD *>(ADDR_SELECT_SV_SIZE))
+// #define CSelect_Size          (*reinterpret_cast<DWORD *>(ADDR_SELECT_SV_SIZE))
 
 // These hold the reference to the instruction memory where the original game function lives. 
 // unsigned long long stands for the DWORD (which is 4bytes for some reason on this machine)
@@ -79,9 +79,9 @@ static unsigned long long s_origCSelectCL_Destruct;
 static unsigned long long s_origCSelect_Size;
 
 
-static unsigned long long s_origCSelect_Create;
-static unsigned long long s_origCSelect_Render;
-static unsigned long long s_origCSelect_Destruct;
+// static unsigned long long s_origCSelect_Create;
+// static unsigned long long s_origCSelect_Render;
+// static unsigned long long s_origCSelect_Destruct;
 
 #define ADDR_BMGR_P1 0x0C
 #define ADDR_BMGR_P2 0x10
@@ -117,12 +117,12 @@ void * __fastcall CSelectCL_OnCreate(void *This)
 	return CSelectCommon_OnCreate(This);
 }
 
-void * __fastcall CSelect_OnCreate(void *This)
-{
-	// super
-	CSelect_Create(This);
-	return CSelectCommon_OnCreate(This);
-}
+// void * __fastcall CSelect_OnCreate(void *This)
+// {
+	// // super
+	// CSelect_Create(This);
+	// return CSelectCommon_OnCreate(This);
+// }
 
 //All Cselect functions On Render will call to this.
 void __fastcall CSelectCommon_OnRender(void *This)
@@ -146,13 +146,13 @@ int __fastcall CSelectCL_OnRender(void *This)
 	return ret;
 }
 
-int __fastcall CSelect_OnRender(void *This)
-{
-	// super
-	int ret = CSelect_Render(This);
-	CSelectCommon_OnRender(This);
-	return ret;
-}
+// int __fastcall CSelect_OnRender(void *This)
+// {
+	// // super
+	// int ret = CSelect_Render(This);
+	// CSelectCommon_OnRender(This);
+	// return ret;
+// }
 
 // All CSelect Functions should call to this one.
 void __fastcall CSelectCommon_OnDestruct(void *This)
@@ -173,11 +173,11 @@ void * __fastcall CSelectCL_OnDestruct(void *This, int, int dyn)
 	return CSelectCL_Destruct(This, dyn);
 }
 
-void * __fastcall CSelect_OnDestruct(void *This, int, int dyn)
-{
-	CSelectCommon_OnDestruct(This);
-	return CSelect_Destruct(This, dyn);
-}
+// void * __fastcall CSelect_OnDestruct(void *This, int, int dyn)
+// {
+	// CSelectCommon_OnDestruct(This);
+	// return CSelect_Destruct(This, dyn);
+// }
 
 
 /*
@@ -352,8 +352,8 @@ extern "C" {
 		CSelectSV_Size = s_origCSelect_Size + 4;
 		CSelectCL_Size = s_origCSelect_Size + 4;
 		
-		s_origCSelect_Create = 
-			TamperNearJmpOpr(0x0041DBEF, union_cast<DWORD>(CSelect_OnCreate));
+		// s_origCSelect_Create = 
+			// TamperNearJmpOpr(0x0041DBEF, union_cast<DWORD>(CSelect_OnCreate));
 		s_origCSelectSV_Create = 
 			TamperNearJmpOpr(CSelectSV_Creater, union_cast<DWORD>(CSelectSV_OnCreate));
 		s_origCSelectCL_Create =
@@ -384,10 +384,10 @@ extern "C" {
 		s_origCSelectCL_Render =
 			TamperDword(vtbl_CSelectCL + 0x08, union_cast<DWORD>(CSelectCL_OnRender));	
 			
-		s_origCSelect_Destruct = 
-			TamperDword(0x00846D18 + 0x00, union_cast<DWORD>(CSelect_OnDestruct));
-		s_origCSelect_Render = 
-			TamperDword(0x00846D18 + 0x08, union_cast<DWORD>(CSelect_OnRender));			
+		// s_origCSelect_Destruct = 
+			// TamperDword(0x00846D18 + 0x00, union_cast<DWORD>(CSelect_OnDestruct));
+		// s_origCSelect_Render = 
+			// TamperDword(0x00846D18 + 0x08, union_cast<DWORD>(CSelect_OnRender));			
 		
 		::VirtualProtect((PVOID)rdata_Offset, rdata_Size, old, &old);
 		
